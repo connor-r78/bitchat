@@ -2,10 +2,16 @@
 
 #define TOKEN_DATA_SIZE 128*531441
 
-extern long _input(char* ptr);
+extern long _input();
+
+extern char input[0x1000];
 
 int main()
 {
+  _input();
+
+  printf("%s", input);
+
   FILE *tokens;
   FILE *hiddenLayer;
 
@@ -15,7 +21,5 @@ int main()
 
   hiddenLayer = fopen("hiddenLayer.txt", "r");
 
-  _input(tokendata);
-  
   return 0;
 }

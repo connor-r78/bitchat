@@ -1,6 +1,7 @@
 .intel_syntax noprefix
 
 .global _input
+.global input
 
 .section .data
 
@@ -53,14 +54,26 @@ _L2:
   xor rdi, rdi
   syscall
 
-/* move input into reserved space
-// rdi input */
+/* prompts input and moves into reserved space */
 _input:
  
-  mov rcx, 0x1000
-  mov rsi, rdi
-  lea rdi, [rip + input]
-  rep movsb
+  xor rax, rax
+  xor rdi, rdi
+  lea rsi, [rip + input]
+  mov rdx, 0x1000
+  syscall
+
+  // add null terminator
+  add rsi, rax
+  mov BYTE PTR [rsi], 0
+
+  // ioctl; flush buffer
+  mov rax, 0x10
+  mov rsi, 0x540B
+  xor rdx, rdx
+  syscall 
+
+  ret
 
 /* rdi threshold
 // returns boolean in rax depending on activation of neural node */
