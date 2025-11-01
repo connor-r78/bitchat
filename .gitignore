@@ -1,2 +1,4 @@
 *.o
 main
+training
+.DS_Store
