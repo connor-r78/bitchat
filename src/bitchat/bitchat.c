@@ -24,5 +24,7 @@ int main()
 
   hiddenLayer = fopen("../../hiddenLayer.txt", "r");
 
+  free(tokendata);
+
   return 0;
 }
