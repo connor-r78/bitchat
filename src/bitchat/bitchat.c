@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define TOKEN_DATA_SIZE 68027648
+#define NUM_WEIGHTS 0x1000 
 
 extern long _input();
 
@@ -17,14 +17,19 @@ int main()
   FILE *hiddenLayer;
 
   tokens = fopen("../../tokens.txt", "r");
-  char* tokendata = (char*) malloc(TOKEN_DATA_SIZE);
-  fgets(tokendata, TOKEN_DATA_SIZE, tokens);
   
-  printf("%s", tokendata);
+  if ( tokens ) {
+  
+    char* tokendata = (char*) malloc(NUM_WEIGHTS);
+    fgets(tokendata, NUM_WEIGHTS, tokens);
 
+    printf("%s\n", tokendata); 
+
+    free(tokendata);
+ 
+  } 
+ 
   hiddenLayer = fopen("../../hiddenLayer.txt", "r");
-
-  free(tokendata);
 
   return 0;
 }

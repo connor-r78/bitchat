@@ -1,3 +1,3 @@
 as src/bitchat/bitchat.s -o bitchat.o
-gcc -Wall -Wextra src/bitchat/bitchat.c bitchat.o -o bitchat
+gcc -g -Wall -Wextra src/bitchat/bitchat.c bitchat.o -o bitchat
 ./bitchat
