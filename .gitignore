@@ -1,4 +1,3 @@
+*.bin
 *.o
-./bitchat
-./training
 .DS_Store
