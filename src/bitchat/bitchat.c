@@ -32,7 +32,7 @@ int main()
   FILE *tokens;
   FILE *hiddenLayer;
 
-  tokens = fopen("../../tokens.txt", "r");
+  tokens = fopen("tokens.txt", "r");
   
   if ( tokens ) {
   
@@ -45,7 +45,7 @@ int main()
  
   } 
  
-  hiddenLayer = fopen("../../hiddenLayer.txt", "r");
+  hiddenLayer = fopen("hiddenLayer.txt", "r");
 
   return 0;
 }
