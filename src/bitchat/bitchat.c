@@ -52,8 +52,8 @@ int main()
  
   if ( tokens ) {
     for ( int i = 0; i < numTokens; ++i ) {
-      long offset = calcToken(input, 0);
       char* newTokenData = grabTokenData(tokens, calcToken(input, i));
+      printf("%s\n", newTokenData);
       strcat(tokenData, newTokenData);
       free(newTokenData);
     }
