@@ -4,6 +4,6 @@ To compile and run use the provided .bash script.
 
 ```./bitchat.bash```
 
-It ships with training data, but you can also train it yourself with that .bash script. (I mean, this isn't currently true, but you get the point.)
+The releases ship with training data (it is not provided in the repo because it is too large for Git), but you can also train it yourself with this .bash script. (I mean, this isn't currently true, but you get the point.)
 
 ```./training.bash```
