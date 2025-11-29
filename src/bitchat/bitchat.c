@@ -1,3 +1,4 @@
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,6 +8,24 @@
 extern long _input();
 
 extern char input[0x1000];
+
+int* parseWeight(char data)
+{ 
+  printf("%b\n", data);
+
+  int* weights = malloc(8 * sizeof(int));
+
+  for ( int i = 7; i >= 0; --i ) {
+    double idx = (double) i;
+    if ( data >= pow(2.0, idx) ) {
+      weights[i] = 1;
+      data -= pow(2.0, idx);
+    }
+    else weights[i] = 0;
+  }
+
+  return weights;
+}
 
 long calcToken(char* token, int tokenOffset)
 {
@@ -41,7 +60,6 @@ char* grabTokenData(FILE* tokens, long token)
 int main()
 {
   long chars = _input();
-  printf("%s\n", input);
   long numTokens = chars / 4;
   if ( chars % 4 != 0 ) ++numTokens;
 
@@ -54,11 +72,16 @@ int main()
   if ( tokens ) {
     for ( int i = 0; i < numTokens; ++i ) {
       char* newTokenData = grabTokenData(tokens, calcToken(input, i));
-      printf("%s\n", newTokenData);
       strcat(tokenData, newTokenData);
       free(newTokenData);
     }
   }
+
+  int* weights = parseWeight(*tokenData);
+  for ( int i = 0; i < 8; ++i ) {
+    printf("Weight %d: %d\n", i, weights[i]); 
+  }
+  free(weights);
 
   hiddenLayer = fopen("hiddenLayer.txt", "r");
 
