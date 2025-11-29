@@ -3,6 +3,10 @@
 .global _input
 .global input
 
+.section .data
+
+prompt: .asciz "You: "
+
 .section .bss
 
 input: .skip 0x1000
@@ -12,6 +16,13 @@ input: .skip 0x1000
 /* prompts input and moves into reserved space 
 // returns number of characters read in rax */
 _input:
+
+  // sys_write; prompt user input
+  mov rax, 0x1
+  mov rdi, 0x1
+  lea rsi, [rip + prompt]
+  mov rdx, 0x5
+  syscall
 
   // sys_read; move input to input; save bytes read to rbx 
   xor rax, rax
@@ -25,9 +36,9 @@ _input:
   add rsi, rax
   mov BYTE PTR [rsi], 0
 
-  // ioctl; flush buffer
+  // sys_ioctl; flush buffer
   mov rax, 0x10
-  mov rsi, 0x540B
+  mov rsi, 0x540B 
   xor rdx, rdx
   syscall
 

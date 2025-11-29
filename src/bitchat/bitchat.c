@@ -41,6 +41,7 @@ char* grabTokenData(FILE* tokens, long token)
 int main()
 {
   long chars = _input();
+  printf("%s\n", input);
   long numTokens = chars / 4;
   if ( chars % 4 != 0 ) ++numTokens;
 
