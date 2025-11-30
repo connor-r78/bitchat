@@ -34,7 +34,7 @@ int main()
 
   FILE *tokens;
   tokens = fopen("tokens.txt", "w");
-  for ( int i = 0; i < 0x6F910; ++i ) {
+  for ( int i = 0; i < NUM_TOKENS; ++i ) {
     for ( int j = 0; j < WEIGHTS / BYTE_SIZE; ++j ) {
       char add = 0;
       add += randChar();

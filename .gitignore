@@ -1,4 +1,4 @@
-*.bin
 *.o
+*.out
 *.txt
 .DS_Store

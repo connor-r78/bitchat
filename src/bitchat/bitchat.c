@@ -38,14 +38,14 @@ long calcToken(char* token, int tokenOffset)
 
   long tmp = 0;
 
+  int exp = 3;
   for ( int i = tokenOffset; i < 4 + tokenOffset; ++i ) {
     char letter = token[i];
     letter -= 0x41;
     if ( letter < 0 ) letter = 0;
-    tmp += letter + 26 * i;
+    tmp += letter * pow(26, exp); 
+    --exp;
   }
-
-  tmp -= 156;
 
   return tmp;
 }
@@ -72,8 +72,6 @@ unsigned char* grabLayerData(FILE* hiddenLayer)
 int main()
 {
   long chars = _input();
-  long rdi = calcToken(input, 0);
-  _printToken(rdi);
   long numTokens = chars / 4;
   if ( chars % 4 != 0 ) ++numTokens;
 

@@ -26,25 +26,25 @@ _parse:
 
   // if chars remain: print one 
   test rax, rax
-  jnz _print 
+  jz .done 
 
-  // return
-  ret
+  push rax
+  call _print
+  pop rax
+
+  jmp _parse
 
 /* calculates relevant char from token; prints it
 // rbx: token id
 // rax: relevant base 26 int */
 _print:
 
-  // save current rax
-  push rax
+  mov rcx, rax
  
   // isolate the current char in rax
   mov rax, rbx
   xor rdx, rdx
-  pop rcx
   div rcx
-  push rcx
 
   // save remainder/new token id to rbx
   mov rbx, rdx
@@ -62,6 +62,7 @@ _print:
   mov rdx, 0x1
   syscall
 
-  // reset rax
-  pop rax
-  call _parse
+  ret
+
+.done:
+  ret

@@ -1,2 +1,2 @@
-gcc -g -Wall -Wextra src/training/training.c -o training.bin -lm
-./training.bin
+gcc -g -Wall -Wextra src/training/training.c -o training.out -lm
+./training.out
