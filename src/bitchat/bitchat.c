@@ -9,10 +9,8 @@ extern long _input();
 
 extern char input[0x1000];
 
-int* parseWeight(char data)
+int* parseWeight(unsigned char data)
 { 
-  printf("%b\n", data);
-
   int* weights = malloc(8 * sizeof(int));
 
   for ( int i = 7; i >= 0; --i ) {
@@ -45,14 +43,14 @@ long calcToken(char* token, int tokenOffset)
   return tmp;
 }
 
-char* grabTokenData(FILE* tokens, long token)
+unsigned char* grabTokenData(FILE* tokens, long token)
 {
-  char* tmpTokenData = (char*) malloc(NUM_WEIGHTS / 8);
+  unsigned char* tmpTokenData = (unsigned char*) malloc(NUM_WEIGHTS / 8);
   
   long offset = token * 1000;
 
   fseek(tokens, offset, SEEK_SET);
-  fgets(tmpTokenData, NUM_WEIGHTS / 8, tokens);
+  fread(tmpTokenData, 1, sizeof tmpTokenData, tokens);
 
   return tmpTokenData;
 }
@@ -67,19 +65,20 @@ int main()
   FILE* hiddenLayer;
 
   tokens = fopen("tokens.txt", "r");
-  char* tokenData = (char*) malloc(numTokens * NUM_WEIGHTS);
+  unsigned char* tokenData = (unsigned char*) malloc(numTokens * NUM_WEIGHTS);
  
   if ( tokens ) {
     for ( int i = 0; i < numTokens; ++i ) {
-      char* newTokenData = grabTokenData(tokens, calcToken(input, i));
-      strcat(tokenData, newTokenData);
+      unsigned char* newTokenData = grabTokenData(tokens, calcToken(input, i));
+      memcpy(tokenData + i * NUM_WEIGHTS / 8, newTokenData, NUM_WEIGHTS / 8);
       free(newTokenData);
     }
   }
 
   int* weights = parseWeight(*tokenData);
+  printf("%c or %b\n", *tokenData, *tokenData);
   for ( int i = 0; i < 8; ++i ) {
-    printf("Weight %d: %d\n", i, weights[i]); 
+    printf("%d: %d\n", i, weights[i]);
   }
   free(weights);
 
