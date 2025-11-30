@@ -2,16 +2,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
+#define BYTE_SIZE 0x8
+#define NUM_TOKENS 456976
 #define NUM_WEIGHTS 0x8000
 
+#define TOKENS_SIZE NUM_TOKENS / BYTE_SIZE
+#define WEIGHTS_SIZE NUM_WEIGHTS / BYTE_SIZE
+
 extern long _input();
+extern long _printToken(long tokenID);
 
 extern char input[0x1000];
 
-int* parseWeight(unsigned char data)
+bool* parseWeight(unsigned char data)
 { 
-  int* weights = malloc(8 * sizeof(int));
+  bool* weights = malloc(BYTE_SIZE * sizeof(bool));
 
   for ( int i = 7; i >= 0; --i ) {
     double idx = (double) i;
@@ -45,7 +52,7 @@ long calcToken(char* token, int tokenOffset)
 
 unsigned char* grabTokenData(FILE* tokens, long token)
 {
-  unsigned char* tmpTokenData = (unsigned char*) malloc(NUM_WEIGHTS / 8);
+  unsigned char* tmpTokenData = (unsigned char*) malloc(WEIGHTS_SIZE);
   
   long offset = token * 1000;
 
@@ -55,9 +62,18 @@ unsigned char* grabTokenData(FILE* tokens, long token)
   return tmpTokenData;
 }
 
+unsigned char* grabLayerData(FILE* hiddenLayer)
+{
+  unsigned char* tmpLayerData = (unsigned char*) malloc(TOKENS_SIZE);
+
+  return tmpLayerData;
+}
+
 int main()
 {
   long chars = _input();
+  long rdi = calcToken(input, 0);
+  _printToken(rdi);
   long numTokens = chars / 4;
   if ( chars % 4 != 0 ) ++numTokens;
 
@@ -70,21 +86,24 @@ int main()
   if ( tokens ) {
     for ( int i = 0; i < numTokens; ++i ) {
       unsigned char* newTokenData = grabTokenData(tokens, calcToken(input, i));
-      memcpy(tokenData + i * NUM_WEIGHTS / 8, newTokenData, NUM_WEIGHTS / 8);
+      memcpy(tokenData + i * WEIGHTS_SIZE, newTokenData, WEIGHTS_SIZE);
       free(newTokenData);
     }
   }
 
-  int* weights = parseWeight(*tokenData);
-  printf("%c or %b\n", *tokenData, *tokenData);
-  for ( int i = 0; i < 8; ++i ) {
-    printf("%d: %d\n", i, weights[i]);
-  }
-  free(weights);
+  bool* weights = parseWeight(*tokenData);
+  free(tokenData); 
 
   hiddenLayer = fopen("hiddenLayer.txt", "r");
 
-  free(tokenData);
+  int layerData[NUM_WEIGHTS];
+
+  for ( int i = 0; i < NUM_WEIGHTS; ++i ) {
+    if ( weights[i] ) ++layerData[i];
+    else --layerData[i];
+  }   
+
+  free(weights);
 
   return 0;
 }

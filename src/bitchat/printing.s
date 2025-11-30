@@ -1,0 +1,67 @@
+.intel_syntax noprefix
+
+.global _printToken
+
+.section .text
+
+/* prints relevant character for token id
+// rdi: token id */
+_printToken:
+
+  mov rbx, rdi
+  mov rax, 456976
+  call _parse
+
+  ret
+
+/* parses the input
+// rbx: token id
+// rax: should be set to 456976 (26^4) */
+_parse:
+
+  // divide rax by 26; store quotient in rax
+  xor rdx, rdx
+  mov rcx, 26
+  div rcx
+
+  // if chars remain: print one 
+  test rax, rax
+  jnz _print 
+
+  // return
+  ret
+
+/* calculates relevant char from token; prints it
+// rbx: token id
+// rax: relevant base 26 int */
+_print:
+
+  // save current rax
+  push rax
+ 
+  // isolate the current char in rax
+  mov rax, rbx
+  xor rdx, rdx
+  pop rcx
+  div rcx
+  push rcx
+
+  // save remainder/new token id to rbx
+  mov rbx, rdx
+
+  // convert char to corresponding lowercase letter; store on stack
+  add al, 0x61
+  sub rsp, 0x8
+  mov [rsp], al
+
+  // sys_write; print letter
+  mov rax, 0x1
+  mov rdi, 0x1
+  mov rsi, rsp
+  add rsp, 0x8
+  mov rdx, 0x1
+  syscall
+
+  // reset rax
+  pop rax
+  call _parse
