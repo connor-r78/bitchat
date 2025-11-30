@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <time.h>
 
 #define BYTE_SIZE 0x8
@@ -11,7 +12,7 @@ int calcChar(int bits[])
   int tmp = 0;
 
   for ( int i = 0; i < BYTE_SIZE; ++i ) {
-    tmp += bits[i] * 2 ^ i;
+    tmp += bits[i] * pow(2, i);
   }
 
   return tmp;
