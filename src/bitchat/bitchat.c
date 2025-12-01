@@ -4,9 +4,14 @@
 #include <string.h>
 #include <stdbool.h>
 
+#define BINARY_BASE 2.0
+
+#define ALPHA_LEN 0x1A
 #define BYTE_SIZE 0x8
+#define MAX_INPUT 0x1000
 #define NUM_TOKENS 456976
 #define NUM_WEIGHTS 0x8000
+#define TOKEN_SIZE 0x4
 
 #define TOKENS_SIZE NUM_TOKENS / BYTE_SIZE
 #define WEIGHTS_SIZE NUM_WEIGHTS / BYTE_SIZE
@@ -14,19 +19,19 @@
 extern long _input();
 extern long _printToken(long tokenID);
 
-extern char input[0x1000];
+extern char input[MAX_INPUT];
 
 bool* parseWeight(unsigned char data)
 { 
   bool* weights = malloc(BYTE_SIZE * sizeof(bool));
 
-  for ( int i = 7; i >= 0; --i ) {
+  for ( int i = BYTE_SIZE - 1; i >= 0; --i ) {
     double idx = (double) i;
-    if ( data >= pow(2.0, idx) ) {
-      weights[i] = 1;
-      data -= pow(2.0, idx);
+    if ( data >= pow(BINARY_BASE, idx) ) {
+      weights[i] = true;
+      data -= pow(BINARY_BASE, idx);
     }
-    else weights[i] = 0;
+    else weights[i] = false;
   }
 
   return weights;
@@ -34,16 +39,16 @@ bool* parseWeight(unsigned char data)
 
 long calcToken(char* token, int tokenOffset)
 {
-  tokenOffset *= 4;
+  tokenOffset *= TOKEN_SIZE;
 
   long tmp = 0;
 
-  int exp = 3;
-  for ( int i = tokenOffset; i < 4 + tokenOffset; ++i ) {
+  int exp = TOKEN_SIZE - 1;
+  for ( int i = tokenOffset; i < TOKEN_SIZE + tokenOffset; ++i ) {
     char letter = token[i];
-    letter -= 0x41;
+    letter -= 'A';
     if ( letter < 0 ) letter = 0;
-    tmp += letter * pow(26, exp); 
+    tmp += letter * pow(ALPHA_LEN, exp); 
     --exp;
   }
 
@@ -54,7 +59,7 @@ unsigned char* grabTokenData(FILE* tokens, long token)
 {
   unsigned char* tmpTokenData = (unsigned char*) malloc(WEIGHTS_SIZE);
   
-  long offset = token * 1000;
+  long offset = token * TOKENS_SIZE;
 
   fseek(tokens, offset, SEEK_SET);
   fread(tmpTokenData, 1, sizeof tmpTokenData, tokens);
@@ -72,8 +77,8 @@ unsigned char* grabLayerData(FILE* hiddenLayer)
 int main()
 {
   long chars = _input();
-  long numTokens = chars / 4;
-  if ( chars % 4 != 0 ) ++numTokens;
+  long numTokens = chars / TOKEN_SIZE;
+  if ( chars % TOKEN_SIZE != 0 ) ++numTokens;
 
   FILE* tokens;
   FILE* hiddenLayer;
@@ -102,6 +107,4 @@ int main()
   }   
 
   free(weights);
-
-  return 0;
 }
