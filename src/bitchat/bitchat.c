@@ -1,4 +1,6 @@
 #include <math.h>
+#include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,7 +12,7 @@
 #define BYTE_SIZE 0x8
 #define MAX_INPUT 0x1000
 #define NUM_TOKENS 456976
-#define NUM_WEIGHTS 0x8000
+#define NUM_WEIGHTS 0x1000
 #define TOKEN_SIZE 0x4
 
 #define TOKENS_SIZE NUM_TOKENS / BYTE_SIZE
@@ -59,7 +61,7 @@ unsigned char* grabTokenData(FILE* tokens, long token)
 {
   unsigned char* tmpTokenData = (unsigned char*) malloc(WEIGHTS_SIZE);
   
-  long offset = token * TOKENS_SIZE;
+  long offset = token * TOKEN_SIZE;
 
   fseek(tokens, offset, SEEK_SET);
   fread(tmpTokenData, 1, sizeof tmpTokenData, tokens);
@@ -67,11 +69,74 @@ unsigned char* grabTokenData(FILE* tokens, long token)
   return tmpTokenData;
 }
 
-unsigned char* grabLayerData(FILE* hiddenLayer)
+unsigned char* grabLayerData(FILE* hiddenLayer, long node)
 {
   unsigned char* tmpLayerData = (unsigned char*) malloc(TOKENS_SIZE);
 
+  long offset = node * TOKENS_SIZE;
+
+  fseek(hiddenLayer, offset, SEEK_SET);
+  fread(tmpLayerData, 1, sizeof tmpLayerData, hiddenLayer);
+
   return tmpLayerData;
+}
+
+int updateLayer(bool* layer, int* tokens, int numTokens)
+{
+  for ( int i = 0; i < numTokens; ++i ) {
+    layer[tokens[i]] = 1;
+  }
+
+  return 0;
+}
+
+int* findActivated(unsigned char* data, size_t dataSize, int* numActivated)
+{
+  size_t totalActivated = 0;
+
+  size_t i = 0;
+  uint64_t chunk;
+  for (; i + BYTE_SIZE <= dataSize; i += BYTE_SIZE) {
+    memcpy(&chunk, data + i, BYTE_SIZE);
+    totalActivated += __builtin_popcountll(chunk); 
+  }
+
+  for (; i < dataSize; i++) totalActivated += __builtin_popcount(chunk);
+
+  int* activated = (int*) malloc(totalActivated * sizeof(int));
+
+  int idx = 0;
+  for ( int i = 0; i < TOKENS_SIZE; ++i ) {
+    bool* weights = parseWeight(data[i]);
+
+    for ( int j = 0; j < BYTE_SIZE; ++j ) {
+      if ( weights[j] ) activated[idx] = i * BYTE_SIZE + j;
+      ++idx;
+    }
+
+    free(weights);
+  }
+
+  *numActivated = idx;
+
+  bool* layerData = (bool*) malloc(TOKENS_SIZE);
+
+  for ( int i = 0; i < NUM_WEIGHTS; ++i ) {
+    unsigned char* newLayerData = grabLayerData(hiddenLayer, i);
+
+    int numActivatedTokens = 0;
+    int* numActivatedTokensPtr = &numActivatedTokens;
+    int* activatedTokens = findActivated(
+      newLayerData,
+      (size_t) TOKENS_SIZE, 
+      numActivatedTokensPtr
+    );
+
+    for ( int i = 0; i < WEIGHTS_SIZE; ++i ) 
+      updateLayer(layerData, activated, idx);
+
+    free(activatedTokens);
+  }   
 }
 
 int main()
@@ -97,14 +162,9 @@ int main()
   bool* weights = parseWeight(*tokenData);
   free(tokenData); 
 
-  hiddenLayer = fopen("hiddenLayer.txt", "r");
+  hiddenLayer = fopen("hiddenlayer.txt", "r");
 
-  int layerData[NUM_WEIGHTS];
 
-  for ( int i = 0; i < NUM_WEIGHTS; ++i ) {
-    if ( weights[i] ) ++layerData[i];
-    else --layerData[i];
-  }   
-
+  free(layerData);
   free(weights);
 }
