@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
 #include <time.h>
 
 #define BINARY_BASE 2.0
@@ -17,27 +16,13 @@
 #define TOKENS_SIZE NUM_TOKENS / BYTE_SIZE
 #define WEIGHTS_SIZE NUM_WEIGHTS / BYTE_SIZE
 
+#include "../utils/utils.h"
+
 extern long _input();
 extern long _printName();
 extern long _printToken(long tokenID);
 
 extern char input[MAX_INPUT];
-
-bool* parseWeight(unsigned char data)
-{ 
-  bool* weights = malloc(BYTE_SIZE * sizeof(bool));
-
-  for ( int i = BYTE_SIZE - 1; i >= 0; --i ) {
-    double idx = (double) i;
-    if ( data >= pow(BINARY_BASE, idx) ) {
-      weights[i] = true;
-      data -= pow(BINARY_BASE, idx);
-    }
-    else weights[i] = false;
-  }
-
-  return weights;
-}
 
 long calcToken(char* token, int tokenOffset)
 {
@@ -103,12 +88,11 @@ int activate(FILE* hiddenlayer, int node, int* activated)
   unsigned char* layerData = grabLayerData(hiddenlayer, (long) node);
 
   for ( int i = 0; i < TOKENS_SIZE; ++i ) {
-    bool* bits = parseWeight(layerData[i]);
+    unsigned char bits = layerData[i];
     for ( int j = 0; j < BYTE_SIZE; ++j ) {
       int tokenID = i * BYTE_SIZE + j;
-      if ( bits[j] ) append(activated, tokenID, &tokenID); 
+      if ( bit(bits, j) ) append(activated, tokenID, &tokenID); 
     }
-    free(bits);
   }
 
   return 0;
@@ -121,9 +105,9 @@ int* markNodes(unsigned char* tokenData, int* nodes)
   int* tmp = (int*) malloc(NUM_WEIGHTS * sizeof(int));
 
   for ( int i = 0; i < WEIGHTS_SIZE; ++i ) {
-    bool* bits = parseWeight(tokenData[i]);
+    unsigned char bits = tokenData[i];
     for ( int j = 0; j < BYTE_SIZE; ++j ) {
-      if ( bits[j] ) append(tmp, i * BYTE_SIZE + j, nodes);
+      if ( bit(bits, j) ) append(tmp, i * BYTE_SIZE + j, nodes);
     }
   }
 
@@ -164,7 +148,6 @@ int main()
   int numnodes = 0;
   int* numnodesptr = &numnodes;
   int* nodes = markNodes(tokenData, numnodesptr);
-  printf("%d\n", numnodes);
   free(tokenData); 
 
   hiddenLayer = fopen("hiddenlayer.txt", "r");

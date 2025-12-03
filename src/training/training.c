@@ -48,7 +48,6 @@ int layerGen()
       add += randChar();
       fprintf(hiddenLayer, "%c", add);
     }
-    printf("%X\n", i);
   }
 
   return 0;
@@ -65,7 +64,6 @@ int tokenGen()
       add += randChar();
       fprintf(tokens, "%c", add);
     }
-    printf("%X\n", i); 
   }
 
   return 0;

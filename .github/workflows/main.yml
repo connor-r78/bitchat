@@ -17,7 +17,7 @@ jobs:
         run: as src/bitchat/printing.s -o printing.o
 
       - name: compile bitchat.c and link
-        run: gcc src/bitchat/bitchat.c bitchat.o printing.o -o bitchat.out -lm
+        run: gcc src/bitchat/bitchat.c src/utils/utils.c bitchat.o printing.o -o bitchat.out -lm
 
       - name: strip binary
         run: strip bitchat.out
