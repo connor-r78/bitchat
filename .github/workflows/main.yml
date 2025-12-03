@@ -20,9 +20,7 @@ jobs:
         run: gcc src/bitchat/bitchat.c bitchat.o printing.o -o bitchat.out -lm
 
       - name: install github cli
-        uses: cli/cli@v2
-        with:
-          version: latest
+        run: sudo apt-get install -y gh
 
       - name: upload binary to 'latest' release
         env:
@@ -43,9 +41,7 @@ jobs:
         run: gcc -g -Wall -Wextra src/training/training.c -o training.out -lm
 
       - name: install github cli
-        uses: cli/cli@v2
-        with:
-          version: latest
+        run: sudo apt-get install -y gh
 
       - name: upload binary to 'latest' release
         env:
