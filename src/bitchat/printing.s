@@ -12,6 +12,8 @@ _printToken:
   mov rax, 456976
   call _parse
 
+  call _printNewLine
+  
   ret
 
 /* parses the input
@@ -59,6 +61,25 @@ _print:
   mov rdi, 0x1
   mov rsi, rsp
   add rsp, 0x8
+  mov rdx, 0x1
+  syscall
+
+  ret
+
+/* prints new line to stdout
+// returns characters printed in rax */
+_printNewLine:
+
+  // put new line on stack
+  mov al, 0xA
+  sub rsp, 0x8
+  mov [rsp], al
+
+  // sys_write; print new line
+  mov rax, 0x1
+  mov rdi, 0x1
+  mov rsi, rsp
+  add rsp, 0x8 
   mov rdx, 0x1
   syscall
 

@@ -1,11 +1,14 @@
 .intel_syntax noprefix
 
 .global _input
+.global _printName
+
 .global input
 
 .section .data
 
 prompt: .asciz "You: "
+response: .asciz "BitChat: "
 
 .section .bss
 
@@ -44,4 +47,18 @@ _input:
 
   mov rax, rbx
   dec rax
+  ret
+
+/* prefixes output from BitChat by saying 'Bitchat: '
+// returns characters printed in rax */
+_printName:
+
+  // sys_write; prefix output with 'BitChat: '
+
+  mov rax, 0x1
+  mov rdi, 0x1
+  lea rsi, [rip + response]
+  mov rdx, 0x9
+  syscall
+
   ret

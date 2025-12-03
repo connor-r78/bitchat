@@ -1,10 +1,9 @@
 #include <math.h>
-#include <stddef.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <time.h>
 
 #define BINARY_BASE 2.0
 
@@ -19,6 +18,7 @@
 #define WEIGHTS_SIZE NUM_WEIGHTS / BYTE_SIZE
 
 extern long _input();
+extern long _printName();
 extern long _printToken(long tokenID);
 
 extern char input[MAX_INPUT];
@@ -76,7 +76,7 @@ unsigned char* grabLayerData(FILE* hiddenLayer, long node)
   long offset = node * TOKENS_SIZE;
 
   fseek(hiddenLayer, offset, SEEK_SET);
-  fread(tmpLayerData, 1, sizeof tmpLayerData, hiddenLayer);
+  fread(tmpLayerData, 1, TOKENS_SIZE, hiddenLayer);
 
   return tmpLayerData;
 }
@@ -90,57 +90,57 @@ int updateLayer(bool* layer, int* tokens, int numTokens)
   return 0;
 }
 
-int* findActivated(unsigned char* data, size_t dataSize, int* numActivated)
+int append(int* array, int data, int* idx)
 {
-  size_t totalActivated = 0;
+  array[*idx] = data;
 
-  size_t i = 0;
-  uint64_t chunk;
-  for (; i + BYTE_SIZE <= dataSize; i += BYTE_SIZE) {
-    memcpy(&chunk, data + i, BYTE_SIZE);
-    totalActivated += __builtin_popcountll(chunk); 
-  }
+  ++*idx;
+  return 0;
+}
 
-  for (; i < dataSize; i++) totalActivated += __builtin_popcount(chunk);
+int activate(FILE* hiddenlayer, int node, int* activated)
+{
+  unsigned char* layerData = grabLayerData(hiddenlayer, (long) node);
 
-  int* activated = (int*) malloc(totalActivated * sizeof(int));
-
-  int idx = 0;
   for ( int i = 0; i < TOKENS_SIZE; ++i ) {
-    bool* weights = parseWeight(data[i]);
-
+    bool* bits = parseWeight(layerData[i]);
     for ( int j = 0; j < BYTE_SIZE; ++j ) {
-      if ( weights[j] ) activated[idx] = i * BYTE_SIZE + j;
-      ++idx;
+      int tokenID = i * BYTE_SIZE + j;
+      if ( bits[j] ) append(activated, tokenID, &tokenID); 
     }
-
-    free(weights);
+    free(bits);
   }
 
-  *numActivated = idx;
+  return 0;
+}
 
-  bool* layerData = (bool*) malloc(TOKENS_SIZE);
+int* markNodes(unsigned char* tokenData, int* nodes)
+{
+  *nodes = 0;
+ 
+  int* tmp = (int*) malloc(NUM_WEIGHTS * sizeof(int));
 
-  for ( int i = 0; i < NUM_WEIGHTS; ++i ) {
-    unsigned char* newLayerData = grabLayerData(hiddenLayer, i);
+  for ( int i = 0; i < WEIGHTS_SIZE; ++i ) {
+    bool* bits = parseWeight(tokenData[i]);
+    for ( int j = 0; j < BYTE_SIZE; ++j ) {
+      if ( bits[j] ) append(tmp, i * BYTE_SIZE + j, nodes);
+    }
+  }
 
-    int numActivatedTokens = 0;
-    int* numActivatedTokensPtr = &numActivatedTokens;
-    int* activatedTokens = findActivated(
-      newLayerData,
-      (size_t) TOKENS_SIZE, 
-      numActivatedTokensPtr
-    );
+  int* newtmp = (int*) malloc(*nodes * sizeof(int));
 
-    for ( int i = 0; i < WEIGHTS_SIZE; ++i ) 
-      updateLayer(layerData, activated, idx);
+  for ( int i = 0; i < *nodes; ++i ) {
+    newtmp[i] = tmp[i];
+  }
 
-    free(activatedTokens);
-  }   
+  free(tmp);
+  return newtmp;  
 }
 
 int main()
 {
+  srand(time(NULL));
+
   long chars = _input();
   long numTokens = chars / TOKEN_SIZE;
   if ( chars % TOKEN_SIZE != 0 ) ++numTokens;
@@ -149,22 +149,36 @@ int main()
   FILE* hiddenLayer;
 
   tokens = fopen("tokens.txt", "r");
-  unsigned char* tokenData = (unsigned char*) malloc(numTokens * NUM_WEIGHTS);
+  int tokenDataLen = numTokens * WEIGHTS_SIZE;
+  unsigned char* tokenData = (unsigned char*) malloc(tokenDataLen);
  
   if ( tokens ) {
     for ( int i = 0; i < numTokens; ++i ) {
       unsigned char* newTokenData = grabTokenData(tokens, calcToken(input, i));
-      memcpy(tokenData + i * WEIGHTS_SIZE, newTokenData, WEIGHTS_SIZE);
+      if ( i == 0 ) *tokenData |= *newTokenData;
+      else *tokenData &= *newTokenData; 
       free(newTokenData);
     }
   }
 
-  bool* weights = parseWeight(*tokenData);
+  int numnodes = 0;
+  int* numnodesptr = &numnodes;
+  int* nodes = markNodes(tokenData, numnodesptr);
+  printf("%d\n", numnodes);
   free(tokenData); 
 
   hiddenLayer = fopen("hiddenlayer.txt", "r");
 
+  int* activated = malloc(NUM_TOKENS * sizeof(int));
 
-  free(layerData);
-  free(weights);
+  for ( int i = 0; i < numnodes; ++i ) {
+    activate(hiddenLayer, nodes[i], activated);
+  }
+  free(nodes);
+
+  long outputID = (long) activated[rand() % NUM_TOKENS];
+  _printName();
+  _printToken(outputID);
+
+  free(activated);
 }
