@@ -19,6 +19,9 @@ jobs:
       - name: compile bitchat.c and link
         run: gcc src/bitchat/bitchat.c bitchat.o printing.o -o bitchat.out -lm
 
+      - name: strip binary
+        run: strip bitchat.out
+
       - name: install github cli
         run: sudo apt-get install -y gh
 
@@ -38,7 +41,10 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: compile training.c
-        run: gcc -g -Wall -Wextra src/training/training.c -o training.out -lm
+        run: gcc -Wall -Wextra src/training/training.c -o training.out -lm
+
+      - name: strip binary
+        run: strip training.out
 
       - name: install github cli
         run: sudo apt-get install -y gh
