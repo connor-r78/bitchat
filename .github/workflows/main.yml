@@ -17,7 +17,7 @@ jobs:
         run: as src/bitchat/printing.s -o printing.o
 
       - name: compile bitchat.c and link
-        run: gcc -std=c23 src/bitchat/bitchat.c src/utils/utils.c bitchat.o printing.o -o bitchat.out -lm
+        run: gcc src/bitchat/bitchat.c src/utils/utils.c bitchat.o printing.o -o bitchat.out -lm
 
       - name: strip binary
         run: strip bitchat.out
@@ -41,7 +41,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: compile training.c
-        run: gcc -std=c23 -Wall -Wextra src/training/training.c -o training.out -lm
+        run: gcc -Wall -Wextra src/training/training.c -o training.out -lm
 
       - name: strip binary
         run: strip training.out
