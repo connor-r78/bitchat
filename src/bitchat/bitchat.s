@@ -28,8 +28,8 @@ _input:
   syscall
 
   // sys_read; move input to input; save bytes read to rbx 
-  xor rax, rax
-  xor rdi, rdi
+  xor eax, eax
+  xor edi, edi
   lea rsi, [rip + input]
   mov rdx, 0x1000
   syscall
@@ -42,7 +42,7 @@ _input:
   // sys_ioctl; flush buffer
   mov rax, 0x10
   mov rsi, 0x540B 
-  xor rdx, rdx
+  xor edx, edx
   syscall
 
   mov rax, rbx

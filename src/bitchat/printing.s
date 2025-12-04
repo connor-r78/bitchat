@@ -22,7 +22,7 @@ _printToken:
 _parse:
 
   // divide rax by 26; store quotient in rax
-  xor rdx, rdx
+  xor edx, edx
   mov rcx, 26
   div rcx
 
@@ -45,7 +45,7 @@ _print:
  
   // isolate the current char in rax
   mov rax, rbx
-  xor rdx, rdx
+  xor edx, edx
   div rcx
 
   // save remainder/new token id to rbx
