@@ -54,7 +54,6 @@ _input:
 _printName:
 
   // sys_write; prefix output with 'BitChat: '
-
   mov rax, 0x1
   mov rdi, 0x1
   lea rsi, [rip + response]
