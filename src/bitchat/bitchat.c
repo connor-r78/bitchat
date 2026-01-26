@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
+#include <sys/time.h>
 
 #define BINARY_BASE 2.0
 
@@ -11,7 +11,7 @@
 #define BYTE_SIZE 0x8
 #define MAX_INPUT 0x1000
 #define NUM_TOKENS 456976
-#define NUM_WEIGHTS 0x1000
+#define NUM_WEIGHTS 0xF0000
 #define TOKEN_SIZE 0x4
 
 #define TOKENS_SIZE NUM_TOKENS / BYTE_SIZE
@@ -124,12 +124,15 @@ int* markNodes(unsigned char* tokenData, int* nodes)
 
 int main()
 {
-  srand(time(NULL));
+  struct timeval start, end;
 
   long chars = _input();
   long numTokens = chars / TOKEN_SIZE;
   if ( chars % TOKEN_SIZE != 0 ) ++numTokens;
 
+  gettimeofday(&start, NULL); 
+  srand(start.tv_sec);
+  
   FILE* tokens;
   FILE* hiddenLayer;
 
@@ -165,4 +168,9 @@ int main()
   _printToken(outputID);
 
   free(activated);
+
+  gettimeofday(&end, NULL);
+  double usec_elapsed = (end.tv_usec - start.tv_usec) / 1e6;
+  double time_elapsed = (end.tv_sec - start.tv_sec) + usec_elapsed;
+  printf("Elapsed time: %.6f seconds\n", time_elapsed);
 }
