@@ -5,6 +5,9 @@
 #include <string.h>
 #include <sys/time.h>
 
+#include "../bitchat.h"
+#include "../utils/utils.h"
+
 #define BINARY_BASE 2.0
 
 #define ALPHA_LEN 0x1A
@@ -16,14 +19,6 @@
 
 #define TOKENS_SIZE NUM_TOKENS / BYTE_SIZE
 #define WEIGHTS_SIZE NUM_WEIGHTS / BYTE_SIZE
-
-#include "../utils/utils.h"
-
-extern long _input();
-extern long _printName();
-extern long _printToken(long tokenID);
-
-extern char input[MAX_INPUT];
 
 long calcToken(char* token, int tokenOffset)
 {
@@ -41,6 +36,30 @@ long calcToken(char* token, int tokenOffset)
   }
 
   return tmp;
+}
+        
+int wrapToken(char* token)
+{
+  int ret = 0;
+  for ( int i = 0; i < 4; ++i ) {
+    ret += ( token[i] - 'A' ) * pow(26, i);
+  }
+
+  return ret;
+}
+
+char* unwrapToken(int token)
+{
+  char* ret = (char*) malloc(sizeof(char) * 4); 
+
+  for ( int i = 0; i < 4; ++i ) {
+    char c = token % 26;
+    token /= 26;
+    c += 'A'; 
+    ret[i] = c;
+  } 
+
+  return ret;
 }
 
 unsigned char* grabTokenData(FILE* tokens, long token)
@@ -122,17 +141,21 @@ int* markNodes(unsigned char* tokenData, int* nodes)
   return newtmp;  
 }
 
-int main()
+char* bitchat(char* input, int seed)
 {
-  struct timeval start, end;
+  if ( seed == 0 ) {
+    struct timeval start;
+    gettimeofday(&start, NULL); 
+    srand(start.tv_sec);
+  }
+  else {
+    srand(seed);
+  } 
 
-  long chars = _input();
-  long numTokens = chars / TOKEN_SIZE;
+  int chars = strlen(input);
+  int numTokens = strlen(input) / TOKEN_SIZE;
   if ( chars % TOKEN_SIZE != 0 ) ++numTokens;
 
-  gettimeofday(&start, NULL); 
-  srand(start.tv_sec);
-  
   FILE* tokens;
   FILE* hiddenLayer;
 
@@ -163,14 +186,8 @@ int main()
   }
   free(nodes);
 
-  long outputID = (long) activated[rand() % NUM_TOKENS];
-  _printName();
-  _printToken(outputID);
-
+  int outputID = activated[rand() % NUM_TOKENS];
   free(activated);
 
-  gettimeofday(&end, NULL);
-  double usec_elapsed = (end.tv_usec - start.tv_usec) / 1e6;
-  double time_elapsed = (end.tv_sec - start.tv_sec) + usec_elapsed;
-  printf("Elapsed time: %.6f seconds\n", time_elapsed);
+  return unwrapToken(outputID);
 }

@@ -15,6 +15,9 @@
 #define TOKENS_SIZE NUM_TOKENS / BYTE_SIZE
 #define WEIGHTS_SIZE NUM_WEIGHTS / BYTE_SIZE
 
+#define LAYER_MODE 1
+#define 
+
 int calcChar(int bits[]) 
 {
   int tmp = 0;
@@ -83,8 +86,12 @@ int main(int argc, char** argv)
 
   if ( argc > ARGS ) return print_usage(argv[0]);
 
-  while ( (opt = getopt(argc, argv, "lt")) != -1 ) {
+  int fromData = 0;
+  int mode = 0;
+  while ( (opt = getopt(argc, argv, "dlt")) != -1 ) {
     switch ( opt ) {
+    case 'd':
+      fromData = 1;
     case 'l':
       return layerGen();
       break;
