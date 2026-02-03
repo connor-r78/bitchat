@@ -3,5 +3,5 @@
 
 int main() 
 {
-  puts(bitchat("The dog is ", 0));
+  puts(bitchat("The dog is ", 1));
 }
