@@ -43,7 +43,7 @@ int randChar()
 int layerGen()
 {
   FILE* hiddenLayer;
-  hiddenLayer = fopen("hiddenlayer.txt", "w");
+  hiddenLayer = fopen("data/hiddenlayer.txt", "w");
 
   for ( int i = 0; i < NUM_WEIGHTS; ++i ) {
     for ( int j = 0; j < TOKENS_SIZE; ++j ) {
@@ -59,7 +59,7 @@ int layerGen()
 int tokenGen()
 {
   FILE* tokens;
-  tokens = fopen("tokens.txt", "w");
+  tokens = fopen("data/tokens.txt", "w");
 
   for ( int i = 0; i < NUM_TOKENS; ++i ) {
     for ( int j = 0; j < WEIGHTS_SIZE; ++j ) {
