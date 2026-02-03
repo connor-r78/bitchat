@@ -1,6 +1,7 @@
-#include "bitchat.h"
+#include <stdio.h>
+#include "../src/bitchat.h"
 
 int main() 
 {
-  bitchat("The dog is ");
+  puts(bitchat("The dog is ", 0));
 }
